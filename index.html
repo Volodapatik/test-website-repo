@@ -1,29 +1,872 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тестовий Сайт</title>
+    <title>Volodymyr Patyk | Interactive Cyber Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #0b0d17;
+            --card-bg: rgba(22, 27, 46, 0.7);
+            --border-color: rgba(0, 242, 254, 0.2);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #ff007f;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --font-main: 'Outfit', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --shadow-glow: 0 0 25px rgba(0, 242, 254, 0.25);
+        }
+
+        [data-theme="matrix"] {
+            --bg-color: #030a05;
+            --card-bg: rgba(10, 30, 15, 0.75);
+            --border-color: rgba(0, 255, 115, 0.25);
+            --primary: #00ff73;
+            --secondary: #00b352;
+            --accent: #39ff14;
+            --text: #d0ffd6;
+            --text-dim: #5c9e68;
+            --shadow-glow: 0 0 25px rgba(0, 255, 115, 0.25);
+        }
+
+        [data-theme="synthwave"] {
+            --bg-color: #120024;
+            --card-bg: rgba(38, 12, 64, 0.75);
+            --border-color: rgba(255, 0, 128, 0.3);
+            --primary: #ff0080;
+            --secondary: #7928ca;
+            --accent: #00dfd8;
+            --text: #fbe4ff;
+            --text-dim: #b886c8;
+            --shadow-glow: 0 0 25px rgba(255, 0, 128, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
-        h1 {
-            color: #0056b3;
+
+        canvas#bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
         }
-        p {
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-btn, .audio-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-btn:hover, .audio-btn:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 12px var(--primary);
+        }
+
+        /* Main Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1.2fr 0.8fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.8rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(0,242,254,0.1), rgba(255,0,127,0.1));
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ffffff, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-dim);
             line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 650px;
+        }
+
+        .badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+        }
+
+        /* Terminal Component */
+        .terminal {
+            background: #05070d;
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 5px;
+        }
+
+        .terminal-output::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .terminal-line {
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .terminal-line.sys { color: var(--primary); }
+        .terminal-line.cmd { color: #fff; }
+        .terminal-line.out { color: var(--text-dim); }
+        .terminal-line.accent { color: var(--accent); }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 8px;
+        }
+
+        .prompt-symbol {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        /* Interactive Canvas Visualizer / Cyber Pad */
+        .visualizer-box {
+            width: 100%;
+            height: 180px;
+            background: #05070d;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas#vizCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .viz-overlay {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            pointer-events: none;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Live Clock & Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: var(--font-mono);
+            margin-top: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Quick Links / Navigation */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .link-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 10px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .link-card:hover {
+            background: var(--primary);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            border-top: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+
+        /* Utility pulse animation */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 1.8s infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
         }
     </style>
 </head>
 <body>
-    <h1>Вітаємо на Тестовому Сайті Володимира Патика!</h1>
-    <p>Цей сайт був створений за допомогою AI-асистента для демонстрації можливостей GitHub Pages.</p>
-    <p>Якщо ви бачите цю сторінку, це означає, що все налаштовано успішно!</p>
-    <p>Дякуємо за використання мого асистента.</p>
+
+    <!-- Background Particle Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo-area">
+                <div class="avatar">VP</div>
+                <div class="logo-text">
+                    <h1>Volodymyr Patyk</h1>
+                    <p><span class="pulse-dot"></span> SYSTEM ONLINE</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="audio-btn" id="audioToggle" title="Увімкнути/Вимкнути аудіо ефекти">
+                    🔊 SFX
+                </button>
+                <button class="theme-btn" id="themeToggle" title="Змінити тему">
+                    🎨 Theme
+                </button>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <div class="hero-banner">
+            <h2 class="hero-title">Інтерактивний AI & Web Хаб</h2>
+            <p class="hero-desc">
+                Ласкаво просимо до оновленого веб-порталу! Тут ви знайдете інтерактивні інструменти, термінал команд, аудіо-синтезатор та швидкий доступ до проєктів.
+            </p>
+            <div class="badge-list">
+                <span class="badge">🚀 GitHub Pages</span>
+                <span class="badge">⚡ HTML5 / WebGL</span>
+                <span class="badge">🤖 AI Assistant Tech</span>
+                <span class="badge">🎶 Web Audio API</span>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Left Column: Terminal & Visualizer -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Terminal Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">💻 Cyber Terminal</span>
+                        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim);">v2.4.0</span>
+                    </div>
+
+                    <div class="terminal" id="terminal">
+                        <div class="terminal-output" id="terminalOutput">
+                            <div class="terminal-line sys">Volodymyr Patyk OS [Version 2.4]</div>
+                            <div class="terminal-line sys">Введіть '<span style="color:var(--accent);">help</span>' для списку доступних команд.</div>
+                        </div>
+                        <div class="terminal-input-line">
+                            <span class="prompt-symbol">&gt;</span>
+                            <input type="text" class="terminal-input" id="terminalInput" placeholder="введіть команду..." autofocus autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Visualizer -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🎵 Interactive Wave Synthesizer</span>
+                        <span style="font-size: 0.8rem; color: var(--text-dim);">Клікніть / Рухайте курсор</span>
+                    </div>
+                    <div class="visualizer-box" id="vizBox">
+                        <canvas id="vizCanvas"></canvas>
+                        <div class="viz-overlay">
+                            <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--primary);">
+                                ⚡ Торкніться для створення звукових імпульсів
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: System Status & Projects -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Stats / Widget Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📊 Системний Монітор</span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Локальний час</div>
+                            <div class="stat-value" id="clock">00:00:00</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Статус Сервера</div>
+                            <div class="stat-value" style="color:#00ff73;">ACTIVE</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Репозиторії</div>
+                            <div class="stat-value">50+</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">FPS Кава</div>
+                            <div class="stat-value" id="fpsCounter">60</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fast Links -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🔗 Мої Проєкти & Посилання</span>
+                    </div>
+                    <div class="links-grid">
+                        <a href="https://github.com/Volodapatik" target="_blank" class="link-card">
+                            <span>📦</span> GitHub Profile
+                        </a>
+                        <a href="https://github.com/Volodapatik/cherkasy-outage-watcher" target="_blank" class="link-card">
+                            <span>⚡</span> Outage Watcher
+                        </a>
+                        <a href="https://github.com/Volodapatik/ukrainian-jarvis" target="_blank" class="link-card">
+                            <span>🤖</span> UA Jarvis
+                        </a>
+                        <a href="https://github.com/Volodapatik/radio-visuals" target="_blank" class="link-card">
+                            <span>📻</span> Radio Visuals
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>© <span id="year"></span> Volodymyr Patyk • Створено з допомогою AI Assistant & GitHub Pages API</p>
+        </footer>
+    </div>
+
+    <script>
+        // Set dynamic year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // -------------------------------------------------------------
+        // Background Particle System
+        // -------------------------------------------------------------
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resizeBgCanvas() {
+            width = bgCanvas.width = window.innerWidth;
+            height = bgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+        resizeBgCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = Math.random() * 2 + 1;
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                bgCtx.save();
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(0, 242, 254, ${this.alpha})`;
+                bgCtx.shadowBlur = 8;
+                bgCtx.shadowColor = '#00f2fe';
+                bgCtx.fill();
+                bgCtx.restore();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBg() {
+            bgCtx.clearRect(0, 0, width, height);
+
+            // Draw subtle lines between close particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        bgCtx.beginPath();
+                        bgCtx.moveTo(particles[i].x, particles[i].y);
+                        bgCtx.lineTo(particles[j].x, particles[j].y);
+                        bgCtx.strokeStyle = `rgba(0, 242, 254, ${0.15 * (1 - dist / 120)})`;
+                        bgCtx.lineWidth = 0.8;
+                        bgCtx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // -------------------------------------------------------------
+        // Live Clock & FPS Counter
+        // -------------------------------------------------------------
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('uk-UA');
+            document.getElementById('clock').textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+        function updateFPS() {
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFpsUpdate >= 1000) {
+                document.getElementById('fpsCounter').textContent = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = now;
+            }
+            requestAnimationFrame(updateFPS);
+        }
+        requestAnimationFrame(updateFPS);
+
+        // -------------------------------------------------------------
+        // Audio Synthesizer (Web Audio API)
+        // -------------------------------------------------------------
+        let audioCtx = null;
+        let soundEnabled = false;
+        const audioBtn = document.getElementById('audioToggle');
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSynthTone(freq = 440, type = 'sine', duration = 0.2) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        audioBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                audioBtn.style.background = 'var(--primary)';
+                audioBtn.style.color = '#000';
+                initAudio();
+                playSynthTone(880, 'sine', 0.15);
+            } else {
+                audioBtn.style.background = 'rgba(255,255,255,0.05)';
+                audioBtn.style.color = 'var(--text)';
+            }
+        });
+
+        // -------------------------------------------------------------
+        // Visualizer Canvas & Sound Interaction
+        // -------------------------------------------------------------
+        const vizCanvas = document.getElementById('vizCanvas');
+        const vizCtx = vizCanvas.getContext('2d');
+        const vizBox = document.getElementById('vizBox');
+        let vizRipples = [];
+
+        function resizeViz() {
+            vizCanvas.width = vizBox.clientWidth;
+            vizCanvas.height = vizBox.clientHeight;
+        }
+        window.addEventListener('resize', resizeViz);
+        resizeViz();
+
+        vizBox.addEventListener('click', (e) => {
+            const rect = vizBox.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            vizRipples.push({ x, y, radius: 0, maxRadius: 100, alpha: 1 });
+
+            // Play synth tone based on X position
+            const freq = 200 + (x / vizCanvas.width) * 600;
+            playSynthTone(freq, 'triangle', 0.3);
+        });
+
+        function animateViz() {
+            vizCtx.clearRect(0, 0, vizCanvas.width, vizCanvas.height);
+
+            // Draw animated wave lines
+            const time = Date.now() * 0.003;
+            vizCtx.beginPath();
+            vizCtx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+            vizCtx.lineWidth = 2;
+
+            for (let x = 0; x < vizCanvas.width; x += 5) {
+                const y = vizCanvas.height / 2 + Math.sin(x * 0.02 + time) * 15;
+                if (x === 0) vizCtx.moveTo(x, y);
+                else vizCtx.lineTo(x, y);
+            }
+            vizCtx.stroke();
+
+            // Draw interactive ripples
+            for (let i = vizRipples.length - 1; i >= 0; i--) {
+                const r = vizRipples[i];
+                r.radius += 3;
+                r.alpha -= 0.02;
+
+                vizCtx.beginPath();
+                vizCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+                vizCtx.strokeStyle = `rgba(255, 0, 127, ${r.alpha})`;
+                vizCtx.lineWidth = 2;
+                vizCtx.stroke();
+
+                if (r.alpha <= 0) vizRipples.splice(i, 1);
+            }
+
+            requestAnimationFrame(animateViz);
+        }
+        animateViz();
+
+        // -------------------------------------------------------------
+        // Terminal Logic
+        // -------------------------------------------------------------
+        const terminalOutput = document.getElementById('terminalOutput');
+        const terminalInput = document.getElementById('terminalInput');
+
+        const commands = {
+            'help': 'Доступні команди: <span class="sys">about, projects, time, clear, matrix, theme, sound</span>',
+            'about': 'Володимир Патик — розробник, захоплений AI, медіа-сервісами та інтерактивними веб-додатками.',
+            'projects': 'Популярні проєкти: <br>• cherkasy-outage-watcher<br>• ukrainian-jarvis<br>• radio-visuals<br>• my-iptv',
+            'time': () => `Поточний час: ${new Date().toLocaleString('uk-UA')}`,
+            'sound': () => {
+                audioBtn.click();
+                return 'Переключено аудіо супровід.';
+            },
+            'matrix': ' Entering Matrix Mode...',
+            'clear': 'CLEAR'
+        };
+
+        function printLine(text, type = 'out') {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+            line.innerHTML = text;
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const input = terminalInput.value.trim().toLowerCase();
+                if (!input) return;
+
+                printLine(`&gt; ${terminalInput.value}`, 'cmd');
+                playSynthTone(500, 'square', 0.05);
+
+                if (input === 'clear') {
+                    terminalOutput.innerHTML = '';
+                } else if (input === 'matrix') {
+                    document.documentElement.setAttribute('data-theme', 'matrix');
+                    printLine('Матрична тема активована 🟢', 'accent');
+                } else if (input === 'theme') {
+                    toggleTheme();
+                    printLine('Тему успішно змінено.', 'sys');
+                } else if (commands[input]) {
+                    const res = typeof commands[input] === 'function' ? commands[input]() : commands[input];
+                    printLine(res, 'out');
+                } else {
+                    printLine(`Команду '${input}' не знайдено. Введіть '<span style="color:var(--accent);">help</span>'`, 'accent');
+                }
+
+                terminalInput.value = '';
+            }
+        });
+
+        // -------------------------------------------------------------
+        // Theme Switcher
+        // -------------------------------------------------------------
+        const themes = ['default', 'synthwave', 'matrix'];
+        let currentThemeIdx = 0;
+
+        function toggleTheme() {
+            currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+            const theme = themes[currentThemeIdx];
+            if (theme === 'default') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            playSynthTone(600, 'sine', 0.1);
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    </script>
 </body>
 </html>
